@@ -17,17 +17,14 @@ except ImportError:
 	print >>sys.stderr, 'ERROR: pprint module not found. Either install pprint with \"pip install pprint\" \n or replace pprint.pprint with print (the debug function)'
 	sys.exit(1)
 
-def debug(string,level=1):
+
+def debug(string, level=1):
 	if args.verbose >= level:
 		pprint.pprint(string,sys.stderr,width=70)
 
 
-
-
-
 class PRule:
-	'Class for a rule prototype'
-
+	# Class for a rule prototype
 	re_any=re.compile(r'^any$', re.IGNORECASE)
 	re_dig=re.compile(r'^\d')		# digital
 	re_nondig=re.compile(r'^\D') 	# non-digital
@@ -68,7 +65,7 @@ class PRule:
 			line=self.re_comment.search(line).group('line')
 		line=self.re_spaces.sub(" ",line)
 		line=self.re_comma.sub(",",line)
-		debug("After clean-up: %s" % line,3)		
+		debug("After clean-up: %s" % line,3)
 		return line
 		
 # addr = IP/mask

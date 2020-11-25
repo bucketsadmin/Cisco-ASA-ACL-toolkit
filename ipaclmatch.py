@@ -53,16 +53,16 @@ def issrc(searchip):
 # arr[9] -- dest IP-address or host
 # arr[10] -- netmask or hostip
 def isdst(searchip):
-	global srcip,srcmask,dstip,dstmask
+	global srcip, srcmask, dstip, dstmask
 	debug("Is %s in the destination?" % str(searchip),2)
 	srcip = arr[7]
 	srcmask = arr[8]
 	if arr[9] == "0.0.0.0" and args.noany : return False
-	if (args.direct and isdir(searchip,arr[9],arr[10])) or (args.contain and isnetin(searchip,arr[9],arr[10])):
+	if (args.direct and isdir(searchip, arr[9], arr[10])) or (args.contain and isnetin(searchip, arr[9], arr[10])):
 		dstip = arr[9]
 		dstmask = arr[10]
 		return True
-	elif isinnet(searchip,arr[9],arr[10]):
+	elif isinnet(searchip, arr[9], arr[10]):
 		debug("isdst -- Yes, it's in %s/%s" % (arr[9],arr[10]),2)
 		if args.replace and args.policy and not args.both:
 			dstip = str(searchip.ip)
@@ -90,7 +90,7 @@ def isinnet(searchip,ip,mask):
 
 
 # Does any of the IP-addresses we are searching for contains the current IP network?
-def isnetin(searchip,ip,mask):
+def isnetin(searchip, ip, mask):
 	return netaddr.IPNetwork(ip + "/" + mask) in searchip
 
 

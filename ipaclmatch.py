@@ -13,12 +13,14 @@ except ImportError:
 	print >>sys.stderr, 'ERROR: netaddr module not found.'
 	sys.exit(1)
 
+
 def debug(string,level=1):
 	if args.verbose >= level:
 		if type(string) is string:
 			print >>sys.stderr,"%s" % string
 		else:
 			pprint.pprint(string,sys.stderr,width=70)
+
 
 # True if the IP belongs to the Source IP
 # arr[7] -- source IP-address or host
@@ -46,6 +48,7 @@ def issrc(searchip):
 		debug("issrc -- No, it's not in %s/%s" % (arr[7],arr[8]),2)
 		return False
 
+
 # True if the IP belongs to the Dest IP
 # arr[9] -- dest IP-address or host
 # arr[10] -- netmask or hostip
@@ -72,20 +75,24 @@ def isdst(searchip):
 		debug("isdst -- No, it's not in %s/%s" % (arr[9],arr[10]),2)
 		return False
 
+
 # True if there is a direct match
 # Go through all IP's in ips and compare with the ip and mask from the ACL
 def isdir(searchip,ip,mask):
-#	if result and args.verbose:
-#		debug("Direct match found for %s (args) and %s %s (ACL)" % (args.addr, ip,mask) ,2)
+	# if result and args.verbose:
+	# debug("Direct match found for %s (args) and %s %s (ACL)" % (args.addr, ip,mask) ,2)
 	return str(searchip.ip) == ip and str(searchip.netmask) == mask
+
 
 # Does any of the IP-addresses we are searching for belong to the current IP network?
 def isinnet(searchip,ip,mask):
 	return searchip in netaddr.IPNetwork(ip + "/" + mask)
 
+
 # Does any of the IP-addresses we are searching for contains the current IP network?
 def isnetin(searchip,ip,mask):
 	return netaddr.IPNetwork(ip + "/" + mask) in searchip
+
 
 # Postformat the ACL and print
 # arr[6] - protocol (ip, tcp, udp)
@@ -104,24 +111,25 @@ def print_acl():
 	debug(line)
 	if args.transform:
 		prepsvc()
-		debug("src= %s/%s dst= %s/%s srv= %s neq_range= %s" % (srcip,srcmask,dstip,dstmask,service,neq_range),2)
+		debug("src= %s/%s dst= %s/%s srv= %s neq_range= %s" % (srcip,  srcmask, stip, dstmask, service, neq_range), 2)
 		if args.policy:
-			print srcip,srcmask,dstip,dstmask,service,action
-			if neq_range: print srcip,srcmask,dstip,dstmask,neq_range,action
+			print srcip, srcmask, dstip, dstmask, service, action
+			if neq_range: print srcip, srcmask, dstip, dstmask, neq_range, action
 		elif args.src:
-			print dstip,dstmask,service, action
-			if neq_range: print dstip,dstmask,neq_range,action
+			print dstip, dstmask, service, action
+			if neq_range: print dstip, dstmask, neq_range, action
 		elif args.dst:
-			print srcip,srcmask,service,action
-			if neq_range: print srcip,srcmask,neq_range,action
+			print srcip, srcmask, service, action
+			if neq_range: print srcip, srcmask, neq_range, action
 	elif args.noline:
-		line=re.sub(r'\bline\b \d+ ','',line)
-		print line.replace('0.0.0.0 0.0.0.0','any')
-	else: print line.replace('0.0.0.0 0.0.0.0','any')
+		line=re.sub(r'\bline\b \d+ ', '', line)
+		print line.replace('0.0.0.0 0.0.0.0', 'any')
+	else: print line.replace('0.0.0.0 0.0.0.0', 'any')
+
 
 # Replace "host" with IP 255.255.255.255
 def host2num(where):
-	global srcip,srcmask,dstip,dstmask
+	global srcip, srcmask, dstip, dstmask
 	if "src" in where:
 		if "host" in arr[9]:
 			arr[9] = arr[10]
@@ -131,20 +139,21 @@ def host2num(where):
 			arr[7] = arr[8]
 			arr[8] = "255.255.255.255"
 
+
 # Place the service in arr[11] in the form of tcp:1234, udp:12345=3456, or *
 # If --range: replace neq, gt, lt with ranges
 # Return True if "neq", False in all other cases
 def prepsvc():
-	global service,neq_range
-	debug("prepsvc -- Before prepsvc",3)
-	debug(arr,3)
+	global service, neq_range
+	debug("prepsvc -- Before prepsvc", 3)
+	debug(arr, 3)
 	if service:
-		debug("prepsvc -- Already processed. Skipping",3)
+		debug("prepsvc -- Already processed. Skipping", 3)
 		return
-	if "icmp" in arr[6] and len(arr)-1 >= 11: arr.insert(11,"eq")
+	if "icmp" in arr[6] and len(arr)-1 >= 11: arr.insert(11, "eq")
 	if len(arr)-1 >= 12: serv2num(12)
 	if len(arr)-1 >= 13: serv2num(13)
-	if "ip" in arr[6]: arr.insert(11,"*")
+	if "ip" in arr[6]: arr.insert(11, "*")
 	elif len(arr) < 12: arr.insert(11, arr[6])
 	elif "range" in arr[11]: arr[11] = arr[6]+':'+arr[12]+'-'+arr[13]
 	elif "neq" in arr[11]:
@@ -170,24 +179,24 @@ def prepsvc():
 			arr[11] = arr[6]+'>'+arr[12]
 	else: arr[11] = arr[6]
 	service=arr[11]
-	debug("prepsvc -- After prepsvc",3)
-	debug(arr,3)
+	debug("prepsvc -- After prepsvc", 3)
+	debug(arr, 3)
 
 
 # Replace service name with port number
 # f is the position in arr
 def serv2num(f):
-	if re.match(r'\d+',arr[f]):
-		debug("serv2num -- Service %s is a number" % str(arr[f]),3)
+	if re.match(r'\d+', arr[f]):
+		debug("serv2num -- Service %s is a number" % str(arr[f]), 3)
 		return  # if number nothing to do
 	if arr[f] in s2n:
-		debug("serv2num -- Replacing %s with %s" % (arr[f],s2n[arr[f]]), 3)
-		arr[f]=s2n[arr[f]]
+		debug("serv2num -- Replacing %s with %s" % (arr[f], s2n[arr[f]]), 3)
+		arr[f] = s2n[arr[f]]
 
 	else:
-		debug(line,0)
-		debug(arr,0)
-		debug("serv2num -- %s is not a known service" % str(arr[f]),0)
+		debug(line, 0)
+		debug(arr, 0)
+		debug("serv2num -- %s is not a known service" % str(arr[f]), 0)
 		sys.exit(1)
 
 
@@ -223,12 +232,12 @@ if "0.0.0.0/0" in args.addr and not args.any: args.contain=True
 if args.both and args.transform:
 	debug("--transform requires either --src or --dst. --transform cannot be used with --both",0)
 	sys.exit(1)
-if args.policy: args.transform=True
+if args.policy: args.transform = True
 if args.both and args.direct:
 	debug("--direct requires either --src or --dst. --both cannot be used with --direct",0)
 	sys.exit(1)
 
-if args.norange: args.range=False
+if args.norange: args.range = False
 
 
 # service name - port mapping from
@@ -247,7 +256,7 @@ if "," in args.addr:
 else:
 		ips.append(netaddr.IPNetwork(args.addr))
 
-f=sys.stdin if "-" == args.acl else open (args.acl,"r")
+f = sys.stdin if "-" == args.acl else open (args.acl,"r")
 
 for line in f:
 	arr = []
@@ -256,14 +265,14 @@ for line in f:
 	debug(line,3)
 	# Remove leftovers
 	if "remark" in line or "object-group" in line or " object " in line or not "extended" in line: continue
-	line=re.sub(r'[ 	][ 	]*',' ',line) 	#replace all multiple tabs and.or spces with a sigle space
-	line=re.sub(r'\(hitcnt.*$|\s+log\s+.*$|\s+log$','',line)		#remove hitcounters and logging statements
-	line=line.replace(r'<--- More --->','')
+	line=re.sub(r'[ 	][ 	]*',' ',line) 	# replace all multiple tabs and.or spces with a sigle space
+	line=re.sub(r'\(hitcnt.*$|\s+log\s+.*$|\s+log$', '', line)		# remove hitcounters and logging statements
+	line=line.replace(r'<--- More --->', '')
 	line = line.strip()
 
 	# Replace any with 0/0
-	line=re.sub(r'\bany\b|\bany4\b','0.0.0.0 0.0.0.0',line)
-	debug(line,2)
+	line = re.sub(r'\bany\b|\bany4\b', '0.0.0.0 0.0.0.0', line)
+	debug(line, 2)
 	arr = line.split()
 
 	# We are not interested in permit lines, if --deny is set

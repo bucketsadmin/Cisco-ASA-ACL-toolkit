@@ -15,6 +15,7 @@ except ImportError:
 	print >>sys.stderr, 'ERROR: netaddr module not found.'
 	sys.exit(1)
 
+
 # If new object is found, add it to the group
 # And set the current names
 def newobj (obj, key):
@@ -23,9 +24,11 @@ def newobj (obj, key):
 	curname=key
 	curobj[curname]=[]
 
+
 # Add new services or networks to the object
 def fillobj (obj, key, val):
 	obj[key].append(val)
+
 
 # Iterate through all objects in netgrp or srvgrp
 def unfold(objarr):
@@ -58,6 +61,7 @@ def unfold_rec(obj, objarr,index=0):
 			del obj[i]
 			unfold_rec(obj,objarr,i)
 
+
 def html_hdr(title):
 	print '<html lang=en><head><title>' + title + '</title></head><body> <style> \
 		body {background: #FFF5DD; color: #000080; font-family: sans-serif; padding-left: 20px; } \
@@ -69,12 +73,15 @@ def html_hdr(title):
 		.deny {color: DarkRed;} </style> \
 		<h1>' + title + ' policy</h1><h4><a href=#content>Content</a></h4>'
 
+
 def html_tbl_hdr(title):
 	print '<table border=1><caption id=' + title + '><h2>' + title + '</h2></caption> \
 	<tr><th>Line #</th><th>Source</th><th>Destination</th><th>Service</th><th>Action</th></tr>'
 
+
 def html_tbl_ftr():
 	print '</table><br /><br />'
+
 
 def html_ftr(content):
 	print '<div id=content><h2>Content</h2><ul>'
@@ -84,11 +91,11 @@ def html_ftr(content):
 
 
 class Rule:
-	'Class for an ACL rule'
-	#access-list myacl remark My best rule
+	# Class for an ACL rule
+	# access-list myacl remark My best rule
 	re_acl_rem = re.compile('^\s*access-list\s+\S+\s+remark\s+(?P<acl_rem>.*$)', re.IGNORECASE)
 
-	#All subsequent remarks are concatenated in this persistent variable
+	# All subsequent remarks are concatenated in this persistent variable
 	remark = ''
 
 	def __init__(self,lnum,line):
@@ -202,6 +209,7 @@ parser.add_argument('--noaggr', default=False, help="Do not aggregate networks",
 args = parser.parse_args()
 if args.acl: args.html=False
 
+
 netobj = {}	# network-objects
 netgrp = {}	# network-groups
 srvgrp = {}	# service-groups
@@ -216,23 +224,23 @@ aclnames = {} # ACL names and interfaces
 
 # hostname fw_name
 re_hostname = re.compile('^\s*hostname\s+(?P<hostname>\S+)', re.IGNORECASE)
-#object network mynet1
+# object network mynet1
 re_objnet = re.compile('^\s*object\s+network\s+(?P<obj_name>\S+)', re.IGNORECASE)
 # subnet 10.1.2.0 255.255.255.0
 re_subnet = re.compile('^\s*subnet\s+(?P<ip>\S+)\s+(?P<mask>\S+)', re.IGNORECASE)
 # host 10.2.1.41
 re_host = re.compile('^\s*host\s+(?P<ip>\S+)', re.IGNORECASE)
-#object-group network mynetgrp1
+# object-group network mynetgrp1
 re_netgrp = re.compile('^\s*object-group\s+network\s+(?P<net_grp>\S+)', re.IGNORECASE)
 # network-object 10.1.1.1 255.255.255.255
 re_netobj = re.compile('^\s*network-object\s+(?P<ip>\S+)\s+(?P<mask>\S+)', re.IGNORECASE)
-#network-object host 10.1.1.1
+# network-object host 10.1.1.1
 re_netobj_host = re.compile('^\s*network-object\s+host\s+(?P<ip>\S+)', re.IGNORECASE)
-#network-object object mynet1
+# network-object object mynet1
 re_netobj_obj = re.compile('^\s*network-object\s+object\s+(?P<obj_name>\S+)', re.IGNORECASE)
-#object-group service mysrvgrp1
+# object-group service mysrvgrp1
 re_srvgrp = re.compile('^\s*object-group\s+service\s+(?P<srv_grp>\S+)\s*$', re.IGNORECASE)
-#object-group service srv_tcp tcp
+# object-group service srv_tcp tcp
 re_srvgrp_proto = re.compile('^\s*object-group\s+service\s+(?P<srv_grp>\S+)\s+(?P<proto>\S+)', re.IGNORECASE)
 # port-object eq ldaps
 re_portobj = re.compile('^\s*port-object\s+(?P<service>.*$)', re.IGNORECASE)
@@ -245,11 +253,11 @@ re_srvobj_ip = re.compile('^\s*service-object\s+(?P<proto>\d+)', re.IGNORECASE)
 # access-list acl_name extended ...
 re_isacl = re.compile('^\s*access-list\s+\S+\s+extended', re.IGNORECASE)
 
-#access-list name
+# access-list name
 re_aclname = re.compile('^\s*access-list\s+(?P<acl_name>\S+)\s+', re.IGNORECASE)
 
 
-#access-group management_acl in interface management
+# access-group management_acl in interface management
 re_aclgrp = re.compile('^\s*access-group\s+(?P<acl_name>\S+)\s+(?P<acl_int>.*$)', re.IGNORECASE)
 
 f=sys.stdin if "-" == args.conf else open (args.conf,"r")
@@ -311,7 +319,7 @@ for line in f:
 			if args.html: r.html()
 			else: r.rprint()
 			rulecnt += 1
-		#Assign interfaces and directions to the corresponfing access-groups
+		# Assign interfaces and directions to the corresponfing access-groups
 		elif re_aclgrp.search(line):
 			aclnames[re_aclgrp.search(line).group('acl_name')] = re_aclgrp.search(line).group('acl_int')
 

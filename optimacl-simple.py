@@ -13,6 +13,7 @@ except ImportError:
 	print >>sys.stderr, 'ERROR: netaddr module not found.'
 	sys.exit(1)
 
+
 # Check if the line contains 3 fields only
 # Remove leading and trailing spaces
 # Replace any with 0/0
@@ -30,11 +31,13 @@ def check_line():
 		print >>sys.stderr, "Too few or too many parameters. Expected: network mask proto:port"
 		sys.exit(1)
 
+
 # Range (port1-port2) to range (port1, port+1, ... port2)
 # srv is a port list, e.g. ["1000", "2000"]
 def rtor(arr,srv):
 	for i in range(int(srv[0]),int(srv[1])+1):
 		arr.append(i)
+
 
 # Add ports to the port array
 def srvadd(port,arr):
@@ -42,6 +45,7 @@ def srvadd(port,arr):
 		rtor(arr,port.split("-"))
 	else:
 		arr.append(int(port))
+
 
 # Sort all ports, remove duplicates, and group in continuous ranges
 # The explanation how it works is here:
@@ -61,17 +65,20 @@ def squeeze(arr):
 			ranges.append(str(group[0])+"-"+str(group[-1]))
 	return ranges
 
+
 # Print "star" networks
 # the CIDR merging is very slow
 def print_star():
 	for i in star_nets:
 		print i.ip, i.netmask, "*"
 
+
 # Is net a part of any networks in the netlist?
 def isnetin(net,netlist):
 	for inet in netlist:
 		if net in inet: return True
 	return False
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('pol', default="-", nargs='?', help="Firewall policy or \"-\" (default) to read from the console")
@@ -94,10 +101,10 @@ for line in f:
 	net,mask,service = line.split()
 	network=netaddr.IPNetwork(net+"/"+mask)
 	if "*" in service:
-# The following two lines can be commented out if memory is not
-# an issue
-#		if not len(policy.get(network,'')) == 0:
-#			del policy[network]
+	# The following two lines can be commented out if memory is not
+	# an issue
+	# if not len(policy.get(network,'')) == 0:
+	# 	del policy[network]
 		star_nets.append(network)
 	else:
 		proto,port = service.split(":") if ":" in service else [service,""]
@@ -155,7 +162,7 @@ if args.group:
 		# 3. Join them together using "," as a separator
 		# The commented out line can be used instead to generate the CIDR /xx notation
 		networks=",".join(map(lambda x: str(x),netaddr.cidr_merge(services[service])))
-#		networks=",".join(map(lambda x: str(x.ip)+"/"+str(x.netmask),netaddr.cidr_merge(services[service])))
+		# networks=",".join(map(lambda x: str(x.ip)+"/"+str(x.netmask),netaddr.cidr_merge(services[service])))
 		if service not in policy.get(networks,''):
 			if len(policy.get(networks,'')) == 0:
 				policy[networks] = []
@@ -166,8 +173,8 @@ if args.group:
 	# Printing the result
 	for net in policy:
 		print net,",".join(policy[net])
-#	CIDR /xx notation
-#	print ",".join(map(lambda x: str(x),star_nets)),"*"
+	# CIDR /xx notation
+	# print ",".join(map(lambda x: str(x),star_nets)),"*"
 	if len(star_nets):
 		print ",".join(map(lambda x: str(x.ip)+"/"+str(x.netmask),star_nets)),"*"
 
@@ -177,6 +184,4 @@ else:
 	for srv in services:
 		for net in netaddr.cidr_merge(services[srv]):
 			print net.ip, net.netmask, srv
-
-
 	print_star()
